@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Distances and Fuel Stations</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        h3 {
+            color: #007BFF;
+        }
+        p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        .route-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #218838;
+        }
+        .last-updated {
+            float: right;
+            font-size: 0.7em;
+            color: #666;
+        }
+        .top5-route {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .top5-button-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 10px;
+        }
+        .top5-button {
+            margin-left: 5px;
+        }
+    </style>
+
+    <script>
+        function openGoogleMapsNavigation(origin, waypoint, destination) {
+            let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+            if (waypoint) {
+                mapsUrl += `&waypoints=${encodeURIComponent(waypoint)}`;
+            }
+            window.open(mapsUrl, '_blank');
+        }
+    </script>
+</head>
+<body>
+    <h1>Route Distances and Fuel Stations</h1>
+
+    <!-- Display Fastest and Shortest Route in the Same Box -->
+    <ul>
+        <li>
+            <h3>Fastest and Shortest Routes</h3>
+            <div class="route-info">
+                <p><strong>Fastest Route:</strong> {{ fastest_route.distance | round(1) }} km <br>
+                Estimated time: {{ fastest_route.duration | round(1) }} minutes <br>
+                Average Speed: {{ fastest_route.average_speed | round(1) }} km/h <br>
+                Estimated Fuel Consumption: {{ fastest_route.fuel_consumption | round(2) }} L <br>
+                Estimated Fuel Cost: {{ fastest_route.fuel_cost | round(2) }} AUD</p>
+                <button onclick="openGoogleMapsNavigation('{{ origin }}', null, '{{ destination }}')">Select Fastest Route</button>
+            </div>
+            <div class="route-info">
+                <p><strong>Shortest Route:</strong> {{ shortest_route.distance | round(1) }} km <br> 
+                Estimated time: {{ shortest_route.duration | round(1) }} minutes <br>
+                Average Speed: {{ shortest_route.average_speed | round(1) }} km/h <br>
+                Estimated Fuel Consumption: {{ shortest_route.fuel_consumption | round(2) }} L <br>
+                Estimated Fuel Cost: {{ shortest_route.fuel_cost | round(2) }} AUD</p>
+                <button onclick="openGoogleMapsNavigation('{{ origin }}', null, '{{ destination }}')">Select Shortest Route</button>
+            </div>
+        </li>
+    </ul>
+
+    <!-- Display Top 5 Routes via Fuel Stations -->
+    <h2>Top 5 Routes via Fuel Stations</h2>
+    <ul>
+        {% for route in route_info[2:] %}  <!-- Start from index 2 to skip fastest and shortest routes -->
+            <li class="top5-route">
+                <div>
+                    <h3>{{ route.name }}: {{ route.distance | round(1) }} km</h3>
+                    {% if route.distance_diff != 0 %}
+                        <p>Travelling more than original route: {{ route.distance_diff | round(2) }} km</p>
+                    {% endif %}
+                    <p>Estimated time: {{ route.duration | round(1) }} minutes <br>
+                    Average Speed: {{ route.average_speed | round(1) }} km/h <br>
+                    Estimated Fuel Consumption: {{ route.fuel_consumption | round(2) }} L <br>
+                    Estimated Fuel Cost: {{ route.fuel_cost | round(2) }} AUD</p>
+
+                    {% if route.fuel_station %}
+                        <p><strong>Fuel Station:</strong> {{ route.fuel_station['N'] }} - {{ route.fuel_station['BrandName'] }}<br>
+                        Address: {{ route.fuel_station['A'] }}<br>
+                        <strong>Fuel Prices:</strong><br>
+                        {% for price in route.fuel_station.PriceInfo %}
+                            {% for fuel in route.fuel_station.FuelType %}
+                                {% if price.FuelId == fuel.FuelId %}
+                                    {{ fuel.Name }}: {{ price.Price | round(3) }} AUD <small class="last-updated">Updated: {{ price.TransactionDateUtc }}</small><br>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="top5-button-container">
+                    <button class="top5-button" onclick="openGoogleMapsNavigation('{{ origin }}', '{{ route.fuel_station['Lat'] }},{{ route.fuel_station['Lng'] }}', '{{ destination }}')">Select This Route</button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a class="back-link" href="/">Back to Route Finder</a>
+</body>
+</html>

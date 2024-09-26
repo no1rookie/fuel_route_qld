@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Route Finder</title>
+    
+    <!-- Add Google Places JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBm6Y9yC8mxarLzSOr_7V9BYSXylw4XpPQ&libraries=places"></script>
+    
+    <!-- Add custom styles -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .form-container label {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .form-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Find a Route</h1>
+        <form action="/get-route" method="POST">
+            <label for="origin">Start Location:</label>
+            <input type="text" id="origin" name="origin" placeholder="Enter start location" required>
+            
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
+            
+            <button type="submit">Get Route</button>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Google Places Autocomplete
+        function initialize() {
+            var originInput = document.getElementById('origin');
+            var destinationInput = document.getElementById('destination');
+
+            var autocompleteOrigin = new google.maps.places.Autocomplete(originInput);
+            var autocompleteDestination = new google.maps.places.Autocomplete(destinationInput);
+
+            // Optionally restrict to Australia (country: 'au')
+            var options = {
+                componentRestrictions: { country: 'au' }
+            };
+
+            autocompleteOrigin.setOptions(options);
+            autocompleteDestination.setOptions(options);
+        }
+
+        // Run initialize function on page load
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+</body>
+</html>
