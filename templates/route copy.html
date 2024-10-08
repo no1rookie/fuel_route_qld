@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Distances and Fuel Stations</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            color: #007BFF;
+        }
+        p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #218838;
+        }
+    </style>
+
+    <script>
+        function openGoogleMapsNavigation(origin, waypoint, destination) {
+            let mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+            if (waypoint) {
+                mapsUrl += `&waypoints=${encodeURIComponent(waypoint)}`;
+            }
+            window.open(mapsUrl, '_blank');
+        }
+    </script>
+</head>
+<body>
+    <h1>Route Distances and Fuel Stations</h1>
+
+    <ul>
+        {% for route in route_info %}
+            <li>
+                <h3>{{ route.name }}: {{ route.distance }} km</h3>
+                {% if route.fuel_station %}
+                    <p><strong>Fuel Station:</strong> {{ route.fuel_station['Site_Name'] }} - {{ route.fuel_station['Site_Brand'] }}<br>
+                    Address: {{ route.fuel_station['Sites_Address_Line_1'] }}, {{ route.fuel_station['Site_Suburb'] }}, {{ route.fuel_station['Site_State'] }} {{ route.fuel_station['Site_Post_Code'] }}<br>
+                    Latitude: {{ route.fuel_station['Site_Latitude'] }}, Longitude: {{ route.fuel_station['Site_Longitude'] }}</p>
+                    <button onclick="openGoogleMapsNavigation('{{ origin }}', '{{ route.fuel_station['Site_Name'] }}', '{{ destination }}')">Select This Route</button>
+                {% else %}
+                    <button onclick="openGoogleMapsNavigation('{{ origin }}', null, '{{ destination }}')">Select This Route</button>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a class="back-link" href="/">Back to Route Finder</a>
+</body>
+</html>

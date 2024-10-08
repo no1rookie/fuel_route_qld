@@ -1,0 +1,120 @@
+import pandas as pd
+from flask import Flask, render_template, request
+import requests
+import os
+
+app = Flask(__name__)
+
+# Replace with your actual Google Maps API key
+GOOGLE_MAPS_API_KEY = "AIzaSyBm6Y9yC8mxarLzSOr_7V9BYSXylw4XpPQ"
+
+csv_file_path = os.path.join(os.path.dirname(__file__), 'fuel_stations_qld.csv')
+
+# Load fuel stations data from CSV
+fuel_stations_df = pd.read_csv(csv_file_path )
+
+def divide_route(route, total_distance, num_points):
+    """Divide the route into num_points equal points."""
+    steps = route['steps']
+    segment_distance = total_distance / num_points
+    
+    points = []
+    distance_accumulated = 0
+    for step in steps:
+        step_distance = step['distance']['value'] / 1000  # Convert to km
+        while distance_accumulated + step_distance >= segment_distance:
+            # Calculate proportional distance within the step
+            ratio = (segment_distance - distance_accumulated) / step_distance
+            lat = step['start_location']['lat'] + ratio * (step['end_location']['lat'] - step['start_location']['lat'])
+            lng = step['start_location']['lng'] + ratio * (step['end_location']['lng'] - step['start_location']['lng'])
+            points.append((lat, lng))
+            distance_accumulated = 0  # Reset the accumulated distance for next point
+            step_distance -= segment_distance
+        distance_accumulated += step_distance
+
+    return points
+
+def get_bounding_box(points):
+    """Get bounding box from a list of lat/lng points."""
+    latitudes = [p[0] for p in points]
+    longitudes = [p[1] for p in points]
+    return min(latitudes), max(latitudes), min(longitudes), max(longitudes)
+
+def get_route_distance_and_info(origin, destination, waypoint=None):
+    """Get the route distance and information from origin to destination, optionally passing through a waypoint."""
+    if waypoint:
+        google_maps_url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}&waypoints={waypoint}&key={GOOGLE_MAPS_API_KEY}"
+    else:
+        google_maps_url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}&key={GOOGLE_MAPS_API_KEY}"
+
+    response = requests.get(google_maps_url)
+    route_data = response.json()
+
+    if response.status_code == 200 and route_data['status'] == 'OK':
+        # Return the total distance of the route
+        total_distance = sum([leg['distance']['value'] for leg in route_data['routes'][0]['legs']]) / 1000  # Convert to km
+        return total_distance, route_data['routes'][0]['legs'][0]
+    else:
+        return None, None
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/get-route', methods=['POST'])
+def get_route():
+    origin = request.form.get('origin')
+    destination = request.form.get('destination')
+
+    # Get the original route distance and steps
+    original_distance, original_steps = get_route_distance_and_info(origin, destination)
+
+    if original_distance is None:
+        return "Error calculating the original route."
+
+    # Divide the route into 10 points based on the original distance
+    points = divide_route({'steps': original_steps['steps']}, original_distance, 10)
+
+    # Get the bounding box
+    min_lat, max_lat, min_lng, max_lng = get_bounding_box(points)
+
+    # Pre-filter fuel stations using bounding box
+    filtered_stations = fuel_stations_df[
+        (fuel_stations_df['Site_Latitude'] >= min_lat) &
+        (fuel_stations_df['Site_Latitude'] <= max_lat) &
+        (fuel_stations_df['Site_Longitude'] >= min_lng) &
+        (fuel_stations_df['Site_Longitude'] <= max_lng)
+    ]
+
+    # Store the route distances and corresponding fuel stations
+    route_info = [{
+        'name': 'Original Route',
+        'distance': original_distance,
+        'fuel_station': None
+    }]
+
+    # Generate routes via each fuel station
+    for _, station in filtered_stations.iterrows():
+        waypoint = f"{station['Site_Latitude']},{station['Site_Longitude']}"
+        distance_with_waypoint, _ = get_route_distance_and_info(origin, destination, waypoint)
+        
+        if distance_with_waypoint:
+            route_info.append({
+                'name': f"Route via {station['Site_Name']}",
+                'distance': distance_with_waypoint,
+                'fuel_station': station.to_dict()
+            })
+
+    # Sort the routes by distance and limit to the top 5 alternative routes
+    sorted_routes = sorted(route_info[1:], key=lambda x: x['distance'])[:5]
+
+    # Add the original route at the start
+    sorted_routes.insert(0, route_info[0])
+
+    # Render the distances and fuel station info on the page
+    return render_template('route.html', route_info=sorted_routes, origin=origin, destination=destination)
+
+application = app
+
+if __name__ == '__main__':
+    application.run(debug=True)
