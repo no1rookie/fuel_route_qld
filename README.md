@@ -73,3 +73,11 @@ The web app provides a simple interface where users can:
 The **Fuel Price Checker** allows users to:
 - Get real-time data on nearby fuel stations.
 - Compare the total fuel cost, including the trip cost to each station.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Copyright
+
+© 2024 Marcus Kim. All rights reserved.
