@@ -2,6 +2,9 @@
 
 **Fuel Route QLD** is a web application designed to help users find the **cheapest route** when traveling by car in Queensland. The app calculates both the **cost** and **time** for each available route, providing users with the best options based on real-time fuel prices and expected travel conditions.
 
+## 🚧 **Note: This project is still under development!** 🚧
+### **More features and functionalities will be added in the future.**
+
 ## Project Overview
 
 When planning a trip, multiple routes are often available, and costs can vary significantly depending on the route taken. This web app suggests the best routes based on the following factors:
@@ -37,9 +40,21 @@ When planning a trip, multiple routes are often available, and costs can vary si
    - Using known fuel consumption rates for different vehicle types and the **average speed** from Google Maps, the app calculates the **trip cost**.
 4. **Fuel Price Checker**: A separate tool allows users to find the **nearest fuel stations**, view fuel prices, and compare the cost to fill a specific amount (e.g., 50L), factoring in the driving cost to the station.
 
+## Planned Features
+
+1. **Providing Routes via Fuel Stations**: 
+   - The app will suggest routes that take into account potential **fuel filling stations** along the way. It will calculate the trip cost considering **price differences at different stations** and suggest where you can save money on fuel.
+   
+2. **Station Price Comparison**: 
+   - The app will include a feature to compare a **specific station's price** level to:
+     - The **market average**.
+     - **Other stations** within a certain radius.
+     - The **regional average**.
+
 ## Real-Time Data Testing
 
 To test the real-time fuel-price data, I created a **Jupyter Notebook** that retrieves the data via API and performs basic statistical analysis. This testing phase ensured the accuracy and reliability of the fuel price data integration.
+You can see **box plots** of fuel prices to provide insights on a **specific site's price level** compared to the **market average** or **regional average**.
 
 ## Fuel Price Checker
 
