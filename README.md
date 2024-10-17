@@ -16,6 +16,18 @@ When planning a trip, multiple routes are often available, and costs can vary si
 - **Fuel Price Checker**: Users can find the nearest fuel stations, compare prices, and calculate filling costs, including the cost to drive to the station.
 - **Mobile-Friendly**: The web app is designed to be accessible on both desktop and mobile devices for ease of use.
 
+
+### Screenshots
+
+#### Home Page (index.html)
+![Home Page](screenshots/index_1.png)
+![Home Page](screenshots/index_2.png)
+![Home Page](screenshots/index_3.png)
+
+#### Route Results
+![Route Results](screenshots/route_1.png)
+![Route Results](screenshots/route_2.png)
+
 ## How It Works
 
 1. **Route Calculation**: When a user enters the origin and destination, the app retrieves multiple routes using the **Google Maps API**. 
