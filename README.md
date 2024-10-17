@@ -55,6 +55,7 @@ When planning a trip, multiple routes are often available, and costs can vary si
 
 To test the real-time fuel-price data, I created a **Jupyter Notebook** that retrieves the data via API and performs basic statistical analysis. This testing phase ensured the accuracy and reliability of the fuel price data integration.
 You can see **box plots** of fuel prices to provide insights on a **specific site's price level** compared to the **market average** or **regional average**.
+![Price Range](screenshots/price_box_1.png)
 
 ## Fuel Price Checker
 
